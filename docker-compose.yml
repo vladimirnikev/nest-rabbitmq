@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  filestore:
+    build: file-store/
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - rabbitmq
+    command: npm run start
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672
+    networks:
+        - rabbitmq_nest
+
+  rabbit-microservice:
+    build: rabbitmq-microservice/
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+      - filestore
+    links:
+      - rabbitmq
+    command: npm run start
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672
+    networks:
+        - rabbitmq_nest
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    # hostname: rabbitmq
+    # volumes:
+    #   - /var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672" 
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 5s
+        timeout: 10s
+        retries: 5
+    networks:
+        - rabbitmq_nest
+
+networks:
+  rabbitmq_nest:
+    driver: bridge

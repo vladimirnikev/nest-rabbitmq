@@ -1,0 +1,14 @@
+{
+   "scripts": {
+      "install": "concurrently -n rabbit-microservice,filestore -c yellow,blue \"npm run install:rabbit\" \"npm run install:filestore\"",
+      "install:rabbit": "cd rabbitmq-microservice && npm i",
+      "install:filestore": "cd file-store && npm i",
+      "dev:rabbit": "cd rabbitmq-microservice && npm run start",
+      "dev:filestore": "cd file-store && npm run start",
+      "shell:rabbitmq": "docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management",
+      "dev": "concurrently -n rabbitmq,rabbit-microservice,filestore -c green,yellow,blue \"npm run shell:rabbitmq\" \"npm run dev:rabbit\" \"npm run dev:filestore\""
+   },
+   "dependencies": {
+      "concurrently": "^6.4.0"
+   }
+}
